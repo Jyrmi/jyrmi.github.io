@@ -11778,11 +11778,14 @@ div#notebook {
 <h2 id="Installation-of-libraries">Installation of libraries<a class="anchor-link" href="#Installation-of-libraries">&#182;</a></h2><p>The steps in this tutorial require a couple of third party libraries which can be installed with <code>pip</code>:</p>
 
 <pre><code>$ sudo pip install beautifulsoup4
-</code></pre>
-<p>$ sudo pip install matplotlib
-    $ sudo pip install pandas
+
+$ sudo pip install matplotlib
+
+$ sudo pip install pandas
+
 $ sudo pip install -U scikit-learn
-    $ sudo pip install seaborn</p>
+
+$ sudo pip install seaborn</code></pre>
 
 </div>
 </div>
@@ -18384,7 +18387,8 @@ AAAASUVORK5CYII=
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><a id="hypothesis-testing-and-machine-learning"></a></p>
-<h1 id="Hypothesis-Testing-and-Machine-Learning">Hypothesis Testing and Machine Learning<a class="anchor-link" href="#Hypothesis-Testing-and-Machine-Learning">&#182;</a></h1>
+<h1 id="Hypothesis-Testing-and-Machine-Learning">Hypothesis Testing and Machine Learning<a class="anchor-link" href="#Hypothesis-Testing-and-Machine-Learning">&#182;</a></h1><p>In the <a href="#exploratory-data-analysis">Exploratory Data Analysis</a> section, we found rating to have potentially significant relationships with gross revenue and number of votes. As such, we would like to pursue  In this section, we perform an F-test that compares how well the two OLS models fit the data. Using the f-statistic from each of these models, we can determine which is a more accurate predictor for a film's rating.</p>
+
 </div>
 </div>
 </div>
@@ -19208,6 +19212,16 @@ strong multicollinearity or other numerical problems.
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The Linear Regression analyses gave us f-statistics of 1.891 for the gross revenue to rating model and 119.2 for the votes to rating model. Because low f-statistics correspond to high p-values and the gross revenue to rating data had a lower f-value, the gross revenue to rating model is the worse model and the votes to rating model is indeed the better model.</p>
+
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
