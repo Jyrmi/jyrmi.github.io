@@ -11760,10 +11760,29 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Introduction-and-Overview">Introduction and Overview<a class="anchor-link" href="#Introduction-and-Overview">&#182;</a></h1><p>Question: what factors correlate strongest with high gross or high rating?</p>
-<p>Plot gross against relevant factors, then plot rating against relevant factors, and describe the relationships.</p>
-<p>Plot country of origin on map.</p>
-<p>Use machine learning (linear regression, random forests, support vector machine) to make a model that predicts gross or rating.</p>
+<h1 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">&#182;</a></h1><p>This tutorial will introduce you to some basic methods for scraping, parsing, and managing data from IMDb top 250 movies list, as well as performing exploratory data analysis, hypothesis testing, and machine learning on that data. The question we would like to answer in this tutorial is whether certain factors ascertained from the site correlate significantly with a film's rating.</p>
+<h2 id="Overview-and-Content">Overview and Content<a class="anchor-link" href="#Overview-and-Content">&#182;</a></h2><p>In this tutorial, we will demonstrate:</p>
+<ol>
+<li>procurement of film data from the <a href="http://www.imdb.com/chart/top?ref_=nv_mv_250_6">IMDb top 250 movies list</a> via python3's BeautifulSoup and requests libraries,</li>
+<li>plotting of several variables and visualization of relationships between variables using pandas, matplotlib, and seaborn,</li>
+<li>implementation of machine learning in the form of ordinary least squares,</li>
+<li>and hypothesis testing using linear regression.</li>
+</ol>
+<p>The following steps can be found in this tutorial:</p>
+<ol>
+<li><a href="#data-curation-and-parsing">Data Curation and Parsing</a></li>
+<li><a href="#data-management">Data Management</a></li>
+<li><a href="#exploratory-data-analysis">Exploratory Data Analysis</a></li>
+<li><a href="#hypothesis-testing-and-machine-learning">Hypothesis Testing and Machine Learning</a></li>
+</ol>
+<h2 id="Installation-of-libraries">Installation of libraries<a class="anchor-link" href="#Installation-of-libraries">&#182;</a></h2><p>The steps in this tutorial require a couple of third party libraries which can be installed with <code>pip</code>:</p>
+
+<pre><code>$ sudo pip install beautifulsoup4
+</code></pre>
+<p>$ sudo pip install matplotlib
+    $ sudo pip install pandas
+$ sudo pip install -U scikit-learn
+    $ sudo pip install seaborn</p>
 
 </div>
 </div>
@@ -11773,6 +11792,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p><a id="data-curation-and-parsing"></a></p>
 <h1 id="Data-Curation-and-Parsing">Data Curation and Parsing<a class="anchor-link" href="#Data-Curation-and-Parsing">&#182;</a></h1><p>Description of the scraping script.</p>
 
 </div>
@@ -11801,29 +11821,33 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#Get the URL</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Get the URL</span>
 <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://www.imdb.com/chart/top?ref_=nv_mv_250_6&#39;</span><span class="p">)</span>
-<span class="c1">#Get text from the URL</span>
+<span class="c1"># Get text from the URL</span>
 <span class="n">html</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
-<span class="c1">#Use BeautifulSoup to read and parse the data to lxml</span>
+<span class="c1"># Use BeautifulSoup to read and parse the data to lxml</span>
 <span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">html</span><span class="p">,</span> <span class="s1">&#39;lxml&#39;</span><span class="p">)</span>
-
+<span class="c1"># Create variables for loop through the lxml to extract data</span>
 <span class="n">movies</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td.titleColumn&#39;</span><span class="p">)</span>
 <span class="n">links</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td.titleColumn a&#39;</span><span class="p">)]</span>
 <span class="n">directorAndActors</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td.titleColumn a&#39;</span><span class="p">)]</span>
 <span class="n">ratings</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data-value&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td.posterColumn span[name=ir]&#39;</span><span class="p">)]</span>
 <span class="n">ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data-tconst&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">soup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td.watchlistColumn div[class=wlb_ribbon]&#39;</span><span class="p">)]</span>
-
+<span class="c1"># Creating empty list</span>
 <span class="n">resultList</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="n">linkList</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">idList</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="c1"># Loop through IMDb 250 movies and extract all the needed data</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">movies</span><span class="p">)):</span>
+    <span class="c1"># Temp List for appending the data for each movie</span>
     <span class="n">tempList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Extract the movie title name as string type</span>
     <span class="n">movie_string</span> <span class="o">=</span> <span class="n">movies</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
     <span class="n">movie</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">movie_string</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
     <span class="n">movie_title</span> <span class="o">=</span> <span class="n">movie</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">7</span><span class="p">]</span>
+    <span class="c1"># Extract the movie&#39;s year</span>
     <span class="n">year</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;\((.*?)\)&#39;</span><span class="p">,</span> <span class="n">movie_string</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     
+    <span class="c1"># Extract the movie&#39;s rank</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">):</span>
         <span class="n">rank</span> <span class="o">=</span> <span class="n">movie</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">):</span>
@@ -11831,24 +11855,32 @@ div#notebook {
     <span class="k">else</span><span class="p">:</span>
         <span class="n">rank</span> <span class="o">=</span> <span class="n">movie</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">movie</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">movie</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
         
+    <span class="c1"># Extract the movie&#39;s director</span>
     <span class="n">director</span> <span class="o">=</span> <span class="n">directorAndActors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
     <span class="n">director</span> <span class="o">=</span> <span class="n">director</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; (&quot;</span><span class="p">)</span>
     
+    <span class="c1"># Append the rank, movie title, year, director, and rating to the temp list</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">rank</span><span class="p">))</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">movie_title</span><span class="p">)</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">year</span><span class="p">))</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">director</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ratings</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
     
+    <span class="c1"># Append the ids to idList for later use</span>
     <span class="n">idList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ids</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     
+    <span class="c1"># Request each movie&#39;s own webpage, more data can be obtain from this webpage</span>
+    <span class="c1"># Same steps as previous </span>
     <span class="n">tempR</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;http://www.imdb.com&quot;</span><span class="o">+</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="n">tempHtml</span> <span class="o">=</span> <span class="n">tempR</span><span class="o">.</span><span class="n">text</span> 
     <span class="n">tempSoup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">tempHtml</span><span class="p">,</span> <span class="s1">&#39;lxml&#39;</span><span class="p">)</span>
-
+    
+    <span class="c1"># Extract the vote count from the movie&#39;s webpage and append to the tempList</span>
     <span class="n">rateVotes</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;span[class=small]&#39;</span><span class="p">)</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">rateVotes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)))</span>
     
+    <span class="c1"># Extract the budget from the movie&#39;s webpage and append to the tempList</span>
+    <span class="c1"># Some of the movies have the budget data missing, So replace the missing data with value 0</span>
     <span class="n">budget</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;div.txt-block&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">budget</span><span class="p">)):</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">budget</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;h4&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;udget&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span>
@@ -11859,7 +11891,9 @@ div#notebook {
         <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">budget</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">break</span>
-    
+            
+    <span class="c1"># Extract the gross from the movie&#39;s webpage and append to the tempList</span>
+    <span class="c1"># Some of the movies have the gross data missing, So replace the missing data with value 0</span>
     <span class="n">gross</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;div.txt-block&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">gross</span><span class="p">)):</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">gross</span><span class="p">[</span><span class="n">o</span><span class="p">]</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;h4&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ross&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span>
@@ -11870,23 +11904,31 @@ div#notebook {
         <span class="k">if</span> <span class="p">(</span><span class="n">o</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">gross</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
             <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">break</span>
-
+            
+    <span class="c1"># Extract the genres from the movie&#39;s webpage and append to the tempList</span>
+    <span class="c1"># Some of the movies may have more than one genre, using join function to join the genres</span>
     <span class="n">genres</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;span[itemprop=genre]&#39;</span><span class="p">)</span>
     <span class="n">genres</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">genres</span><span class="p">]</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">genres</span><span class="p">))</span>
-
+    
+    <span class="c1"># Extract the writers from the movie&#39;s webpage and append to the tempList</span>
+    <span class="c1"># Some of the movies may have more than one writers, using join function to join the writers</span>
     <span class="n">writers</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;div.credit_summary_item span[itemprop=creator]&#39;</span><span class="p">)</span>
     <span class="n">tempstr</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">writers</span><span class="p">)):</span>
         <span class="n">tempstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">writers</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; (&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempstr</span><span class="p">))</span>
     
+    <span class="c1"># Extract the actors from the movie&#39;s webpage and append to the tempList</span>
+    <span class="c1"># All of the movies have more than one writers, use + operation to join</span>
     <span class="n">stars</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;div.credit_summary_item span[itemprop=actors]&#39;</span><span class="p">)</span>
     <span class="n">tempstr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">stars</span><span class="p">)):</span>
         <span class="n">tempstr</span> <span class="o">=</span> <span class="n">tempstr</span> <span class="o">+</span> <span class="n">stars</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">+</span><span class="s2">&quot; &quot;</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tempstr</span><span class="p">)</span>
     
+    <span class="c1"># Extract the countries from the movie&#39;s webpage and append to the tempList</span>
+    <span class="c1"># Some of the movies may have more than one producation country, using join function to join the countries</span>
     <span class="n">country</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;div.txt-block a[itemprop=url]&#39;</span><span class="p">)</span>
     <span class="n">tempstr</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">country</span><span class="p">)):</span>
@@ -11894,21 +11936,25 @@ div#notebook {
             <span class="n">tempstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">country</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempstr</span><span class="p">))</span>
     
+    <span class="c1"># Extract the color from the movie&#39;s webpage and append to the tempList</span>
     <span class="n">color</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;div.txt-block a[itemprop=url]&#39;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)):</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">color</span><span class="p">[</span><span class="n">m</span><span class="p">])</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;/title?colors&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
             <span class="k">break</span>
-    
+            
+    <span class="c1"># Extract the production company from the movie&#39;s webpage and append to the tempList</span>
+    <span class="c1"># Some of the movies may have more than one production company, using join function to join the production company</span>
     <span class="n">production</span> <span class="o">=</span> <span class="n">tempSoup</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;div.txt-block span[itemprop=name]&#39;</span><span class="p">)</span>
     <span class="n">tempstr</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">production</span><span class="p">)):</span>
         <span class="n">tempstr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">production</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">getText</span><span class="p">())</span>
     <span class="n">tempList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempstr</span><span class="p">))</span>
     
-    <span class="n">linkList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;http://www.imdb.com/&quot;</span><span class="o">+</span><span class="n">links</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="c1"># Append the tempList to the resultList, which will be use for creating the pandas dataframe</span>
     <span class="n">resultList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tempList</span><span class="p">)</span>
 
+<span class="c1"># Create and initialize the dataframe&#39;s column name   </span>
 <span class="n">data_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;rank&quot;</span><span class="p">,</span><span class="s2">&quot;title&quot;</span><span class="p">,</span><span class="s2">&quot;year&quot;</span><span class="p">,</span><span class="s2">&quot;director&quot;</span><span class="p">,</span><span class="s2">&quot;rating&quot;</span><span class="p">,</span> <span class="s2">&quot;votes&quot;</span><span class="p">,</span><span class="s2">&quot;budget&quot;</span><span class="p">,</span><span class="s2">&quot;gross&quot;</span><span class="p">,</span><span class="s2">&quot;genres&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;writers&quot;</span><span class="p">,</span><span class="s2">&quot;actors&quot;</span><span class="p">,</span><span class="s2">&quot;country&quot;</span><span class="p">,</span><span class="s2">&quot;color&quot;</span><span class="p">,</span><span class="s2">&quot;production_co&quot;</span><span class="p">]</span>
 
@@ -12089,7 +12135,8 @@ memory usage: 27.4+ KB
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Data-Management">Data Management<a class="anchor-link" href="#Data-Management">&#182;</a></h1><p>This section involves handling missing data. We elected to simply drop rows where votes, budget, or gross are missing, to ensure we are using a consistent set of data for our visualizations. We would also like to clean up the categorical values so that they aren't followed by a superfluous delimiter ", ". This will make for easier string splitting later on.</p>
+<p><a id="data-management"></a></p>
+<h1 id="Data-Management">Data Management<a class="anchor-link" href="#Data-Management">&#182;</a></h1><p>This section involves handling missing data. We elect to simply drop rows where votes, budget, or gross are missing, to ensure we are using a consistent set of data for our visualizations.</p>
 
 </div>
 </div>
@@ -12099,8 +12146,11 @@ memory usage: 27.4+ KB
 <div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tidy_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;votes&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;budget&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;gross&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Drop rows where votes, budget, or gross are zero, indicating they are missing.</span>
+<span class="n">tidy_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;votes&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;budget&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;gross&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)]</span>
 <span class="n">tidy_df</span> <span class="o">=</span> <span class="n">tidy_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Review the new and tidied data frame.</span>
 <span class="n">tidy_df</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
 <span class="n">tidy_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -12264,7 +12314,8 @@ memory usage: 17.7+ KB
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Exploratory-Data-Analysis">Exploratory Data Analysis<a class="anchor-link" href="#Exploratory-Data-Analysis">&#182;</a></h1><p>Now we can begin to visualize relationships between variables to learn about potentially interesting relationships between them.</p>
+<p><a id="exploratory-data-analysis"></a></p>
+<h1 id="Exploratory-Data-Analysis">Exploratory Data Analysis<a class="anchor-link" href="#Exploratory-Data-Analysis">&#182;</a></h1><p>With the data tidied, we can now begin to visualize relationships between variables to learn about potentially interesting relationships between them. Since we are interested in discovering predictors for film ratings, we plot ratings against some of our other variables.</p>
 
 </div>
 </div>
@@ -12274,7 +12325,7 @@ memory usage: 17.7+ KB
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Ratings-against-other-variables">Ratings against other variables<a class="anchor-link" href="#Ratings-against-other-variables">&#182;</a></h2><p>First, we would like to visualize the relationship between film ratings and some other variables to get a general idea of which variables would be the most interesting to pursue as features in a learned model.</p>
+<h2 id="Ratings-against-other-variables">Ratings against other variables<a class="anchor-link" href="#Ratings-against-other-variables">&#182;</a></h2><p>First, we would like to visualize the relationship between film ratings and some other variables to get a general idea of which of them would be the most interesting to pursue for our regression tests.</p>
 
 </div>
 </div>
@@ -12284,7 +12335,7 @@ memory usage: 17.7+ KB
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Sanity-check:-ratings-against-release-years">Sanity check: ratings against release years<a class="anchor-link" href="#Sanity-check:-ratings-against-release-years">&#182;</a></h3><p>Newer movies are not necessarily better/worse just because they're newer, right?</p>
+<h3 id="Sanity-check:-ratings-against-release-years">Sanity check: ratings against release years<a class="anchor-link" href="#Sanity-check:-ratings-against-release-years">&#182;</a></h3><p>We would not expect movies to do better or worse based on their release dates. Newer movies are not necessarily better/worse just because they're newer, right?</p>
 
 </div>
 </div>
@@ -12653,7 +12704,8 @@ ERkMgzcREZHBMHgTEREZDIM3ERGRwTB4ExERGQyDNxERkcH8f1+32Tbn7Dt4AAAAAElFTkSuQmCC
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Ratings-against-budgets">Ratings against budgets<a class="anchor-link" href="#Ratings-against-budgets">&#182;</a></h3>
+<h3 id="Ratings-against-budgets">Ratings against budgets<a class="anchor-link" href="#Ratings-against-budgets">&#182;</a></h3><p>The first variable that we may intuitively guess influences a film's rating in some way is its budget. This makes sense - the more capital that is poured into a filmmaking project, the better one should expect the film's quality, and therefore rating, to be.</p>
+
 </div>
 </div>
 </div>
@@ -13001,7 +13053,7 @@ AAAASUVORK5CYII=
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The flatness of this line indicates that there is no strong relationship between rating and budget.</p>
+<p>To our surprise, the flatness of this line indicates that there is no strong relationship between rating and budget. Let's try some other variables and see if we have more luck there.</p>
 
 </div>
 </div>
@@ -13011,7 +13063,8 @@ AAAASUVORK5CYII=
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Ratings-against-gross-revenues">Ratings against gross revenues<a class="anchor-link" href="#Ratings-against-gross-revenues">&#182;</a></h3>
+<h3 id="Ratings-against-gross-revenues">Ratings against gross revenues<a class="anchor-link" href="#Ratings-against-gross-revenues">&#182;</a></h3><p>Gross revenue is a metric that is only obtained after a film's release and probably after the initial influx of a film's first ratings, but it may still have something to say about the long-term behavior of a film's rating, anyway.</p>
+
 </div>
 </div>
 </div>
@@ -13385,7 +13438,7 @@ IiKyGYY3ERGRzfx/OiheLxrF9CAAAAAASUVORK5CYII=
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Though there is an upwards trend, ratings do not seem to be particularly strongly correlated with the gross revenue of a film. Like budget, gross is another dollar value and varies dramatically. A logarithmic scale on the gross axis might be of use here.</p>
+<p>Though there is an upwards trend, ratings do not seem to be particularly strongly correlated with the gross revenue of a film either.</p>
 
 </div>
 </div>
@@ -13395,7 +13448,8 @@ IiKyGYY3ERGRzfx/OiheLxrF9CAAAAAASUVORK5CYII=
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Ratings-against-IMDb-votes">Ratings against IMDb votes<a class="anchor-link" href="#Ratings-against-IMDb-votes">&#182;</a></h3>
+<h3 id="Ratings-against-IMDb-votes">Ratings against IMDb votes<a class="anchor-link" href="#Ratings-against-IMDb-votes">&#182;</a></h3><p>Number of ratings on a film is another after-the-fact metric, but it could be an indicator for the popularity of a film. If that is the case, then we are essentially looking at the relationship between the popularity of a film and its rating here.</p>
+
 </div>
 </div>
 </div>
@@ -13885,7 +13939,8 @@ MpK8hRBCCJOR5C2EEEKYzP8DBviALdmPQqsAAAAASUVORK5CYII=
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">split_unique_values</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># In a list of comma-delimited strings, find all unique strings.</span>
+<span class="k">def</span> <span class="nf">split_unique_values</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
     <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
         <span class="n">entry_items</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">)</span>
@@ -13894,6 +13949,7 @@ MpK8hRBCCJOR5C2EEEKYzP8DBviALdmPQqsAAAAASUVORK5CYII=
                 <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">items</span>
 
+<span class="c1"># Compute and display a list of unique values from these potentially interesting categories.</span>
 <span class="n">unique_directors</span> <span class="o">=</span> <span class="n">split_unique_values</span><span class="p">(</span><span class="n">tidy_df</span><span class="o">.</span><span class="n">director</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
 <span class="n">unique_genres</span> <span class="o">=</span> <span class="n">split_unique_values</span><span class="p">(</span><span class="n">tidy_df</span><span class="o">.</span><span class="n">genres</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
 <span class="n">unique_countries</span> <span class="o">=</span> <span class="n">split_unique_values</span><span class="p">(</span><span class="n">tidy_df</span><span class="o">.</span><span class="n">country</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
@@ -14419,10 +14475,11 @@ CXUhhBDCQ0ioCyGEEB7i/wOBdPM56aHBHQAAAABJRU5ErkJggg==
 <div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CHUNK_SIZE</span> <span class="o">=</span> <span class="mi">10</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CHUNK_SIZE</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1"># The number of violins to show on each violin plot</span>
 
+
+<span class="c1"># Yield successive n-sized chunks from l</span>
 <span class="k">def</span> <span class="nf">chunks</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Yield successive n-sized chunks from l.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="n">n</span><span class="p">):</span>
         <span class="k">yield</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">]</span>
 
@@ -16490,6 +16547,16 @@ GNgRERERERH5OAZ2REREREREPo6BHRERERERkY/7f+dGrVh+od4OAAAAAElFTkSuQmCC
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>The same goes here. The spread seems to be relatively mild, indicating that there likely is no significant interaction between genre and rating.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Ratings-by-country">Ratings by country<a class="anchor-link" href="#Ratings-by-country">&#182;</a></h3><p>Let's do the same for the countries category.</p>
 
 </div>
@@ -16500,7 +16567,7 @@ GNgRERERERH5OAZ2REREREREPo6BHRERERERkY/7f+dGrVh+od4OAAAAAElFTkSuQmCC
 <div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Split multi-value genre rows into multiple rows, each with one genre</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Split multi-value country rows into multiple rows, each with one genre</span>
 <span class="n">melted_countries</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;rating&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;country&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">))</span>
                          <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tidy_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()])</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
 <span class="n">melted_countries</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;country&#39;</span><span class="p">,</span> <span class="s1">&#39;rating&#39;</span><span class="p">]</span>
@@ -18294,7 +18361,8 @@ AAAASUVORK5CYII=
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Each of these categories are relatively even about a center line. It seems we are safe to proceed without incorporating interaction variables.</p>
+<p>Unfortunately, some countries are only represented once in the data. It's difficult to learn any sort of meaningful interaction if this is the case. The countries that have sufficient representation seem to have relatively low spread in relation to one another.</p>
+<p>Since each of color, genre, and country categories are relatively even about their center lines, it seems we are safe to proceed without incorporating interaction variables.</p>
 
 </div>
 </div>
@@ -18304,8 +18372,8 @@ AAAASUVORK5CYII=
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Hypothesis-Testing-and-Machine-Learning">Hypothesis Testing and Machine Learning<a class="anchor-link" href="#Hypothesis-Testing-and-Machine-Learning">&#182;</a></h1><p>Applying ordinary-least-squares using an example found at <a href="https://www.datarobot.com/blog/multiple-regression-using-statsmodels/">https://www.datarobot.com/blog/multiple-regression-using-statsmodels/</a>.</p>
-
+<p><a id="hypothesis-testing-and-machine-learning"></a></p>
+<h1 id="Hypothesis-Testing-and-Machine-Learning">Hypothesis Testing and Machine Learning<a class="anchor-link" href="#Hypothesis-Testing-and-Machine-Learning">&#182;</a></h1>
 </div>
 </div>
 </div>
@@ -18318,10 +18386,12 @@ AAAASUVORK5CYII=
 <span class="kn">import</span> <span class="nn">statsmodels.formula.api</span> <span class="k">as</span> <span class="nn">smf</span>
 <span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">linear_model</span>
 
+<span class="c1"># Prepare the columns for the linear regression function</span>
 <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tidy_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 <span class="n">gross</span> <span class="o">=</span> <span class="n">tidy_df</span><span class="o">.</span><span class="n">gross</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">ratings</span> <span class="o">=</span> <span class="n">tidy_df</span><span class="o">.</span><span class="n">rating</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
+<span class="c1"># Fit the model with gross revenue and ratings columns</span>
 <span class="n">regr</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LinearRegression</span><span class="p">()</span>
 <span class="n">regr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">gross</span><span class="p">,</span> <span class="n">ratings</span><span class="p">)</span>
 
@@ -18708,12 +18778,14 @@ strong multicollinearity or other numerical problems.
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">votes</span> <span class="o">=</span> <span class="n">tidy_df</span><span class="o">.</span><span class="n">votes</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Prepare the columns for the linear regression function</span>
+<span class="n">votes</span> <span class="o">=</span> <span class="n">tidy_df</span><span class="o">.</span><span class="n">votes</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">ratings</span> <span class="o">=</span> <span class="n">tidy_df</span><span class="o">.</span><span class="n">rating</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
+<span class="c1"># Fit the model with votes and ratings columns</span>
 <span class="n">regr</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">votes</span><span class="p">,</span> <span class="n">ratings</span><span class="p">)</span>
 
 <span class="c1"># Plot ratings against gross revenue</span>
@@ -19097,7 +19169,7 @@ Dep. Variable:                 rating   R-squared:                       0.429
 Model:                            OLS   Adj. R-squared:                  0.425
 Method:                 Least Squares   F-statistic:                     119.2
 Date:                Thu, 18 May 2017   Prob (F-statistic):           4.60e-21
-Time:                        20:01:32   Log-Likelihood:                 36.595
+Time:                        20:32:04   Log-Likelihood:                 36.595
 No. Observations:                 161   AIC:                            -69.19
 Df Residuals:                     159   BIC:                            -63.03
 Df Model:                           1                                         
@@ -19125,6 +19197,27 @@ strong multicollinearity or other numerical problems.
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Summary-and-references">Summary and references<a class="anchor-link" href="#Summary-and-references">&#182;</a></h1><p>This tutorial highlighted some techniques for data analysis. Much more detail about the libraries and question on IMDB data come be find on the following links.</p>
+<ol>
+<li>Pandas: <a href="http://pandas.pydata.org/pandas-docs/stable/">http://pandas.pydata.org/pandas-docs/stable/</a></li>
+<li>BeautifulSoup: <a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/">https://www.crummy.com/software/BeautifulSoup/bs4/doc/</a></li>
+<li>Numpy: <a href="http://www.numpy.org/">http://www.numpy.org/</a></li>
+<li>Seaborn: <a href="https://seaborn.pydata.org/">https://seaborn.pydata.org/</a></li>
+<li>Matplotlib: <a href="https://matplotlib.org/">https://matplotlib.org/</a></li>
+<li>Statsmodels: <a href="http://www.statsmodels.org/stable/index.html">http://www.statsmodels.org/stable/index.html</a></li>
+<li>Sklearn: <a href="http://scikit-learn.org/stable/">http://scikit-learn.org/stable/</a></li>
+<li>SKLearn OLS Example: <a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/">https://www.crummy.com/software/BeautifulSoup/bs4/doc/</a></li>
+<li>IMDb Top 250 Movies: <a href="http://www.imdb.com/chart/top?ref_=nv_mv_250_6">http://www.imdb.com/chart/top?ref_=nv_mv_250_6</a></li>
+</ol>
+
+</div>
+</div>
 </div>
     </div>
   </div>
