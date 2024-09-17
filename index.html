@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!-- Data Layer Initialization -->
+  <script type="text/javascript">
+    function pushAutoViewContent(){
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        content_ids: ['ABC123', 'XYZ789'],
+        content_type: 'vehicle',
+        country: 2024,
+        postal_code: 10036
+        // Add remaining parameters here
+      });
+      window.alert("Fired auto view content event");
+   }
+  </script>
+  <!-- Data Layer Initialization -->
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -16,6 +31,7 @@
   <!-- End Google Tag Manager (noscript) -->
   <h1>Hello World</h1>
   <p>I'm hosted with GitHub Pages.</p>
+  <input type="button" value="Push Auto View Content" onclick="pushAutoViewContent()">
   <!-- TikTok Pixel Code Start -->
   <script>
   !function (w, d, t) {
