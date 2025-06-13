@@ -4,24 +4,24 @@
   <!-- Data Layer Initialization -->
   <script type="text/javascript">
     function pushAutoAddToWishlist(){
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: 'AddToWishlist',
-        content_ids: ['ABC123', 'XYZ789'],
-        content_type: 'vehicle',
-        country: 2024,
-        postal_code: 10036,
-        make: 'Ford',
-        model: 'Camry',
-        year: 1000,
-        state_of_vehicle: 'used',
-        mileage: 5000,
-        mileage_unit: 'MI',
-        exterior_color: 'black',
-        transmission: 'manual',
-        body_style: 'coupe'
-        // Add remaining parameters here
-      });
+      // window.dataLayer = window.dataLayer || [];
+      // window.dataLayer.push({
+      //   event: 'AddToWishlist',
+      //   content_ids: ['ABC123', 'XYZ789'],
+      //   content_type: 'vehicle',
+      //   country: 2024,
+      //   postal_code: 10036,
+      //   make: 'Ford',
+      //   model: 'Camry',
+      //   year: 1000,
+      //   state_of_vehicle: 'used',
+      //   mileage: 5000,
+      //   mileage_unit: 'MI',
+      //   exterior_color: 'black',
+      //   transmission: 'manual',
+      //   body_style: 'coupe'
+      //   // Add remaining parameters here
+      // });
 
       ttq.track('AddToWishlist', {
         "contents": [
@@ -32,6 +32,7 @@
             content_ids: ['ABC123', 'XYZ789'],
             content_type: 'vehicle',
             country: 2024,
+            currency: 'USD',
             postal_code: 10036,
             make: 'Ford',
             model: 'Camry',
@@ -41,7 +42,8 @@
             mileage_unit: 'MI',
             exterior_color: 'black',
             transmission: 'manual',
-            body_style: 'coupe'
+            body_style: 'coupe',
+            value: '1234'
           }
         ],
         "value": "<content_value>", // number. Value of the order or items sold. Example: 100.
