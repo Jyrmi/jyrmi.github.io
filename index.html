@@ -22,6 +22,32 @@
         body_style: 'coupe'
         // Add remaining parameters here
       });
+
+      ttq.track('AddToWishlist', {
+        "contents": [
+          {
+            content_id: 1234, // string. ID of the product. Example: "1077218".
+            content_name: "car", // string. The name of the page or product. Example: "shirt".
+            // event: 'AddToWishlist',
+            content_ids: ['ABC123', 'XYZ789'],
+            content_type: 'vehicle',
+            country: 2024,
+            postal_code: 10036,
+            make: 'Ford',
+            model: 'Camry',
+            year: 1000,
+            state_of_vehicle: 'used',
+            mileage: 5000,
+            mileage_unit: 'MI',
+            exterior_color: 'black',
+            transmission: 'manual',
+            body_style: 'coupe'
+          }
+        ],
+        "value": "<content_value>", // number. Value of the order or items sold. Example: 100.
+        "currency": "<content_currency>" // string. The 4217 currency code. Example: "USD".
+      });
+
       window.alert("Fired auto Add To Wishlist event");
     }
   </script>
@@ -44,7 +70,7 @@
   <input type="button" value="Push AddToCart with Event Builder"">
   <br>
   <br>
-  <input type="button" value="Push AddToWishlist with JS" onclick="pushAutoAddToWishlist()">
+  <input type="button" value="Push AddToWishlist with JS">
   <!-- TikTok Pixel Code Start -->
   <script>
   !function (w, d, t) {
